@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<!--
+  Reysourcez Voice Transcriber - page
+  VERSION 0.2 | file: Reysourcez-Transcriber-page_v0.2.html | 2026-10-08
+  Needs these files beside it: styles.css, site-config.js, nav-config.js,
+  Reysourcez-Transcriber-recorder_v0.2.js
+  Header and footer follow the class names in styles.css. If another page on your site
+  uses different header markup, copy that page's <header> over this one.
+  CONSENT TEXT below is a draft: have it checked by a Malaysian lawyer before public use.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice Transcriber v0.2 - Reysourcez</title>
+  <meta name="description" content="Record or upload speech and get a transcript in Bahasa Malaysia, Bahasa Sarawak, English and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="site-config.js?v=2" defer></script>
+  <script src="nav-config.js?v=2" defer></script>
+  <script src="Reysourcez-Transcriber-recorder_v0.2.js" defer></script>
+  <style>
+    /* Page-only rules. Colours and fonts come from the tokens in styles.css. */
+    [hidden] { display: none !important; }
+    .rzt-ver { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-left: 8px; cursor: help; letter-spacing: 0; }
+    .rzt-layout { display: grid; gap: 24px; grid-template-columns: 1fr; padding: 8px 0 8px; }
+    @media (min-width: 940px) { .rzt-layout { grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); align-items: start; } }
+    .rzt-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; margin-bottom: 20px; }
+    .rzt-card h2 { font-size: 1.25rem; margin: 0 0 14px; }
+    .rzt-card h3 { font-size: 1rem; margin: 18px 0 8px; }
+    .rzt-card .btn { cursor: pointer; font-family: var(--font-body); }
+    .rzt-card .btn:disabled, .rzt-card .btn.is-disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .rzt-card .btn-secondary, .rzt-panels .btn-secondary { background: transparent; color: var(--ink); }
+    .rzt-card .btn-secondary:hover:not(:disabled), .rzt-panels .btn-secondary:hover:not(:disabled) { background: var(--ink); color: #fff; }
+    .rzt-small { padding: 8px 14px; font-size: 0.85rem; }
+    .rzt-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; font-size: 0.9rem; color: var(--text); }
+    .rzt-field > span { font-weight: 600; }
+    .rzt-field input[type="text"], .rzt-field input[type="password"], .rzt-field select, .rzt-field textarea {
+      padding: 9px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--text);
+      font-family: var(--font-body); font-size: 0.95rem; width: 100%;
+    }
+    .rzt-check { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; font-size: 0.92rem; line-height: 1.45; }
+    .rzt-check input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+    .rzt-hint { color: var(--muted); font-size: 0.85rem; margin: 2px 0 0; }
+    .rzt-msg { font-size: 0.88rem; margin: 8px 0 0; color: var(--muted); min-height: 1.2em; }
+    .rzt-msg.is-ok { color: var(--accent-dark); }
+    .rzt-msg.is-warn { color: #8a5a00; }
+    .rzt-msg.is-bad { color: #C0392B; font-weight: 600; }
+    .rzt-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .rzt-chip { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); color: var(--muted); }
+    .rzt-chip.is-ok { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent-dark); }
+    .rzt-chip.is-bad { background: #F7E6E2; border-color: #F7E6E2; color: #C0392B; }
+    .rzt-chip-btn { cursor: pointer; font-family: var(--font-body); background: var(--surface); color: var(--accent-dark); border-color: var(--accent); }
+    .rzt-chip-btn:disabled { opacity: 0.6; cursor: default; }
+    .rzt-link { background: none; border: none; padding: 0; color: var(--accent-dark); font: inherit; font-size: 0.88rem; font-weight: 600; text-decoration: underline; cursor: pointer; }
+    .rzt-note { background: var(--paper); border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 14px; font-size: 0.85rem; color: var(--muted); margin: 12px 0; }
+    .rzt-note strong { color: var(--text); }
+    .rzt-note.is-warn { border-left-color: #D4A017; }
+
+    .rzt-settings { display: grid; gap: 0 14px; grid-template-columns: 1fr; }
+    @media (min-width: 520px) and (max-width: 939px) { .rzt-settings { grid-template-columns: 1fr 1fr; } }
+
+    .rzt-rec-wrap { display: flex; align-items: center; gap: 20px; margin: 22px 0 10px; padding-left: 4px; }
+    .rzt-rec {
+      --level: 0;
+      position: relative; width: 128px; height: 128px; border-radius: 50%; border: 0; flex-shrink: 0;
+      background: var(--accent); color: #fff; font: 600 0.95rem var(--font-body); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 0 0 calc(4px + var(--level) * 26px) var(--accent-soft);
+      transition: box-shadow 0.08s linear, background 0.15s ease;
+    }
+    .rzt-rec:hover:not(:disabled) { background: var(--accent-dark); }
+    .rzt-rec:disabled { background: var(--muted); cursor: not-allowed; box-shadow: none; }
+    .rzt-rec[aria-pressed="true"] { background: #C0392B; box-shadow: 0 0 0 calc(4px + var(--level) * 26px) rgba(192, 57, 43, 0.22); }
+    .rzt-rec-dot { width: 20px; height: 20px; border-radius: 50%; background: #fff; display: block; }
+    .rzt-rec[aria-pressed="true"] .rzt-rec-dot { border-radius: 4px; }
+    .rzt-time { font-family: "IBM Plex Mono", "Courier New", monospace; font-size: 1.7rem; color: var(--ink); }
+    .rzt-status { font-size: 0.92rem; color: var(--muted); min-height: 1.4em; margin: 6px 0 0; }
+    .rzt-status.is-ok { color: var(--accent-dark); }
+    .rzt-status.is-rec { color: #C0392B; font-weight: 600; }
+    .rzt-status.is-warn { color: #8a5a00; font-weight: 600; }
+    .rzt-status.is-bad { color: #C0392B; font-weight: 600; }
+    @media (prefers-reduced-motion: reduce) { .rzt-rec { transition: none; } }
+
+    .rzt-upload { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); }
+    .rzt-upload input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+    .rzt-upload label.btn:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+    .rzt-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .rzt-empty { color: var(--muted); padding: 28px 8px; text-align: center; }
+    .rzt-part { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; background: var(--surface); }
+    .rzt-part-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-weight: 600; color: var(--ink); }
+    .rzt-part-meta { font-size: 0.82rem; color: var(--muted); font-weight: 400; }
+    .rzt-part-state { font-size: 0.85rem; color: var(--muted); margin: 4px 0 0; min-height: 1.2em; }
+    .rzt-part-state.is-bad { color: #C0392B; font-weight: 600; }
+    .rzt-part textarea { display: block; width: 100%; min-height: 140px; margin-top: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; font: 1rem/1.6 var(--font-body); color: var(--text); background: var(--paper); resize: vertical; }
+    .rzt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .rzt-engine-run { margin-top: 10px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; background: var(--paper); font-size: 0.9rem; }
+    .rzt-engine-run summary { cursor: pointer; font-weight: 600; }
+    .rzt-engine-text { white-space: pre-wrap; margin: 8px 0; color: var(--text); }
+
+    .rzt-panels { padding-bottom: 56px; }
+    .rzt-panels details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 12px; }
+    .rzt-panels summary { padding: 14px 18px; cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--ink); font-size: 1.05rem; }
+    .rzt-panels details > div { padding: 0 18px 18px; }
+    .rzt-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
+    .rzt-table th, .rzt-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .rzt-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); background: var(--paper); }
+    .rzt-scroll { overflow-x: auto; }
+    .rzt-list { margin: 10px 0 0; padding-left: 20px; font-size: 0.92rem; }
+    .rzt-list li { margin-bottom: 6px; }
+    .rzt-diag { background: var(--ink); color: #E6ECE8; border-radius: 8px; padding: 14px; font-family: "IBM Plex Mono", "Courier New", monospace; font-size: 0.78rem; line-height: 1.5; white-space: pre-wrap; overflow-x: auto; margin-top: 12px; min-height: 60px; }
+    .rzt-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .rzt-row .rzt-field { flex: 1 1 160px; margin-bottom: 0; }
+    @media print { .rzt-left, .rzt-panels, .rzt-toolbar, .rzt-actions { display: none !important; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Main">
+      <a class="brand" href="index.html">Reysourcez</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li class="nav-dropdown">
+          <button class="nav-dropdown-toggle active" type="button" aria-haspopup="true" aria-expanded="false" id="nav-dd-toggle">Business Analysis <span class="nav-dropdown-caret" aria-hidden="true"></span></button>
+          <ul class="nav-dropdown-menu"><!-- populated by nav-config.js --></ul>
+        </li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="calc-intro">
+      <div class="wrap">
+        <h1>Voice Transcriber <small class="rzt-ver" title="Voice Transcriber v0.2, build 2026-10-08">v0.2</small></h1>
+        <p class="lead">Record a meeting or upload a recording and get a transcript in Bahasa Malaysia, Bahasa Sarawak, English and more. Fix the text, and the word list and repeat fixes teach it your words.</p>
+        <noscript><p class="rzt-msg is-bad">This page needs JavaScript to record and transcribe.</p></noscript>
+      </div>
+    </section>
+
+    <div class="wrap rzt-layout">
+      <div class="rzt-left">
+        <section class="rzt-card" id="rzt-setup" aria-labelledby="rzt-setup-h">
+          <h2 id="rzt-setup-h">Set up</h2>
+          <div class="rzt-chips" id="rzt-conn" aria-live="polite"></div>
+          <label class="rzt-field"><span>Access code</span>
+            <input type="password" id="rzt-access" autocomplete="off" spellcheck="false">
+          </label>
+          <details>
+            <summary class="rzt-hint">Admin code (only if you were given a separate one)</summary>
+            <label class="rzt-field"><span>Admin code</span>
+              <input type="password" id="rzt-admin" autocomplete="off" spellcheck="false">
+            </label>
+            <p class="rzt-hint">Needed to approve repeat fixes and to verify or delete word-list entries. If you have only one code, leave this empty.</p>
+          </details>
+          <label class="rzt-check"><input type="checkbox" id="rzt-remember" checked> <span>Remember the codes on this device</span></label>
+          <button type="button" class="btn btn-primary" id="rzt-connect">Connect</button>
+          <p class="rzt-msg" id="rzt-setup-msg" role="status"></p>
+
+          <h3>Before you record</h3>
+          <label class="rzt-check"><input type="checkbox" id="rzt-c-processing"> <span>I understand my audio is sent to AI services outside Malaysia (Google Gemini and Cloudflare Workers AI) to turn it into text.</span></label>
+          <label class="rzt-check"><input type="checkbox" id="rzt-c-participants"> <span>Everyone who is recorded knows it and agrees.</span></label>
+          <label class="rzt-check"><input type="checkbox" id="rzt-c-keep"> <span>Optional: keep my audio so Sarawak language models can learn from it. I can delete it any time under History.</span></label>
+          <p class="rzt-hint" id="rzt-c-keep-note"></p>
+          <button type="button" class="btn btn-secondary" id="rzt-c-save">Save my choices</button>
+          <p class="rzt-msg" id="rzt-c-status" role="status"></p>
+        </section>
+
+        <section class="rzt-card" id="rzt-record-card" aria-labelledby="rzt-rec-h">
+          <h2 id="rzt-rec-h">Record or upload</h2>
+          <div class="rzt-settings">
+            <label class="rzt-field"><span>Language</span>
+              <select id="rzt-lang"></select>
+            </label>
+            <label class="rzt-field"><span>Speech engine</span>
+              <select id="rzt-engine">
+                <option value="auto">Automatic</option>
+                <option value="gemini">Gemini</option>
+                <option value="whisper">Whisper (Cloudflare)</option>
+                <option value="both">Compare both</option>
+              </select>
+            </label>
+          </div>
+          <label class="rzt-field"><span>Title (optional)</span>
+            <input type="text" id="rzt-title" maxlength="120" placeholder="Weekly meeting">
+          </label>
+          <label class="rzt-check"><input type="checkbox" id="rzt-smart"> <span>Tidy up filler words (leave off when you are measuring accuracy)</span></label>
+          <label class="rzt-check" id="rzt-keep-wrap" hidden><input type="checkbox" id="rzt-keep"> <span>Keep the audio of this recording</span></label>
+          <label class="rzt-check" id="rzt-tab-wrap" hidden><input type="checkbox" id="rzt-tab"> <span>Also record the meeting tab's sound (desktop Chrome or Edge)</span></label>
+          <p class="rzt-hint" id="rzt-tab-hint" hidden>When you press Start, choose the meeting tab and tick "Also share tab audio". The sound is recorded inside your browser; the meeting itself is not changed.</p>
+
+          <div class="rzt-rec-wrap">
+            <button type="button" class="rzt-rec" id="rzt-rec" aria-pressed="false" disabled>
+              <span class="rzt-rec-dot" aria-hidden="true"></span>
+              <span id="rzt-rec-label">Start recording</span>
+            </button>
+            <div class="rzt-time" id="rzt-time" aria-hidden="true">00:00</div>
+          </div>
+          <p class="rzt-status" id="rzt-status" role="status" aria-live="polite"></p>
+
+          <div class="rzt-note is-warn" id="rzt-phone-warning"><strong>On a phone, do not record on the device that is in the call.</strong> Android gives the microphone to one app at a time, so either the call or the recording goes silent. Put this device in the room, or use a second device.</div>
+          <div class="rzt-note" id="rzt-ios-note" hidden><strong>iPhone:</strong> keep this page open in Safari with the screen on. Avoid "Add to Home Screen" for recording, because microphone access there has been reported to stop in the background.</div>
+
+          <div class="rzt-upload">
+            <label class="btn btn-secondary rzt-small" id="rzt-file-btn" for="rzt-file">Upload an audio file</label>
+            <input type="file" id="rzt-file" accept="audio/*,.m4a,.mp3,.wav,.webm,.ogg,.opus,.flac,.aac" disabled>
+            <p class="rzt-hint">mp3, m4a, wav, webm, ogg, flac or aac, up to 20 MB. If your meeting app saves an audio-only file, use that one.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="rzt-right">
+        <section class="rzt-card" id="rzt-transcript-card" aria-labelledby="rzt-tr-h">
+          <h2 id="rzt-tr-h">Transcript</h2>
+          <div class="rzt-toolbar">
+            <button type="button" class="btn btn-secondary rzt-small" id="rzt-copy">Copy all</button>
+            <button type="button" class="btn btn-secondary rzt-small" id="rzt-download">Download .txt</button>
+            <button type="button" class="btn btn-secondary rzt-small" id="rzt-clear">Clear view</button>
+          </div>
+          <p class="rzt-empty" id="rzt-empty">Your transcript appears here, part by part. Start a recording or upload a file.</p>
+          <div id="rzt-parts"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="wrap rzt-panels">
+      <details>
+        <summary>Word list</summary>
+        <div>
+          <p class="rzt-hint">Words and names the engine should expect. Words you add are sent with every recording in that language.</p>
+          <div class="rzt-row">
+            <label class="rzt-field"><span>Language</span><select id="rzt-lex-lang"></select></label>
+            <label class="rzt-field"><span>Word</span><input type="text" id="rzt-lex-term" maxlength="60"></label>
+            <label class="rzt-field"><span>Meaning (optional)</span><input type="text" id="rzt-lex-meaning" maxlength="200"></label>
+            <button type="button" class="btn btn-primary rzt-small" id="rzt-lex-add">Add word</button>
+          </div>
+          <div class="rzt-row" style="margin-top:10px">
+            <label class="btn btn-secondary rzt-small" for="rzt-lex-file">Import a CSV</label>
+            <input type="file" id="rzt-lex-file" accept=".csv,text/csv" style="position:absolute;width:1px;height:1px;opacity:0">
+            <button type="button" class="rzt-link" id="rzt-lex-template">Download the CSV template</button>
+          </div>
+          <p class="rzt-msg" id="rzt-lex-msg" role="status"></p>
+          <p class="rzt-hint" id="rzt-lex-count"></p>
+          <div class="rzt-scroll">
+            <table class="rzt-table">
+              <thead><tr><th>Word</th><th>Meaning</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="rzt-lex-list"></tbody>
+            </table>
+          </div>
+          <p class="rzt-empty" id="rzt-lex-empty" hidden>No words yet for this language. Add one above, import a CSV, or tap the new words that appear after you fix a transcript.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Suggested fixes</summary>
+        <div>
+          <p class="rzt-hint">When you correct the same word the same way three times, it appears here. Approve it and it is applied to future transcripts automatically.</p>
+          <button type="button" class="btn btn-secondary rzt-small" id="rzt-rules-refresh">Refresh</button>
+          <p class="rzt-msg" id="rzt-rules-msg" role="status"></p>
+          <ul class="rzt-list" id="rzt-rules-list"></ul>
+          <p class="rzt-empty" id="rzt-rules-empty" hidden>No repeated fixes waiting.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>History</summary>
+        <div>
+          <p class="rzt-hint">Recordings made on this device. Delete removes the text and any saved audio.</p>
+          <button type="button" class="btn btn-secondary rzt-small" id="rzt-hist-refresh">Refresh</button>
+          <p class="rzt-msg" id="rzt-hist-msg" role="status"></p>
+          <ul class="rzt-list" id="rzt-hist-list"></ul>
+          <p class="rzt-empty" id="rzt-hist-empty" hidden>Nothing recorded on this device yet.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Usage and cost</summary>
+        <div>
+          <button type="button" class="btn btn-secondary rzt-small" id="rzt-usage-refresh">Refresh</button>
+          <p class="rzt-hint" id="rzt-usage-out" role="status"></p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Diagnostics</summary>
+        <div>
+          <p class="rzt-hint">Checks your browser, the Worker and the engines, and lists recent problems. If something fails, copy the report and send it to whoever is helping you.</p>
+          <div class="rzt-actions">
+            <button type="button" class="btn btn-primary rzt-small" id="rzt-diag-run">Run checks</button>
+            <button type="button" class="btn btn-secondary rzt-small" id="rzt-diag-copy">Copy report</button>
+          </div>
+          <p class="rzt-msg" id="rzt-diag-msg" role="status"></p>
+          <pre class="rzt-diag" id="rzt-diag-out" tabindex="0">Press "Run checks".</pre>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-bottom">&copy; <span id="rzt-year"></span> Reysourcez Enterprise. Voice Transcriber v0.2.</div>
+    </div>
+  </footer>
+
+  <script>
+    // Opens and closes the Business Analysis menu on tap or click (desktop also opens on hover through styles.css).
+    (function () {
+      var dd = document.querySelector('.nav-dropdown');
+      var btn = document.getElementById('nav-dd-toggle');
+      if (!dd || !btn) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = dd.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', function (e) { if (!dd.contains(e.target)) { dd.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); } });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { dd.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); } });
+    })();
+  </script>
+</body>
+</html>
